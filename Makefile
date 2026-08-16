@@ -24,7 +24,7 @@ data:
 
 train: data
 	mkdir -p $(DATA_DIR)/models
-	$(PY) -m defend.transaction.model --data $(TRANSACTIONS) --config $(CONFIG) \
+	$(PY) -m defend.transaction --data $(TRANSACTIONS) --config $(CONFIG) \
 		--model-out $(MODEL) --holdout-out $(HOLDOUT)
 
 loop: train
