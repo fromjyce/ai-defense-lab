@@ -158,6 +158,7 @@ class EvolutionaryAttacker:
                 )
             )
 
+            df = df.assign(detector_score=detector_scores)
             evader_mask = detector_scores < cfg.deployed_threshold
             if evader_mask.any():
                 evader_frames.append(df.loc[evader_mask])
