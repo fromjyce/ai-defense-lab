@@ -1,0 +1,68 @@
+# Attack taxonomy — the Identify pillar.
+#
+# This pass defines the schema only, with three example rows (one grounded
+# citation each) to prove the shape out. Filling in the full six-surface
+# matrix (S1-S6, per the team brief) is future work.
+#
+# Row schema:
+#   id:          stable identifier, "<surface>-<index>", e.g. "S1-01"
+#   surface:     one of S1 GenAI social engineering | S2 India rails |
+#                S3 CNP/card-present | S4 Agentic commerce |
+#                S5 Adversarial ML | S6 LLM scaling factors
+#   vector:      short name of the attack vector
+#   description: one or two sentences, no invented figures
+#   source:
+#     name: the named source (incident report, protocol spec, regulator, or
+#           vendor — vendor figures must be attributed, never stated as fact)
+#     url:  traceable link
+#   rail:        the payment rail or channel this vector targets
+#                (e.g. wire-transfer, card-not-present, upi, agentic-mandate,
+#                 model-query-interface)
+#   severity:    low | medium | high | critical — qualitative, not a score
+#                derived from any dataset we hold
+
+schema_version: 1
+
+rows:
+  - id: S1-01
+    surface: S1
+    vector: Deepfake video/voice CFO fraud
+    description: >
+      Attacker uses real-time deepfake video and voice to impersonate senior
+      executives on a video call, directing finance staff to execute wire
+      transfers. Every call participant other than the victim was
+      AI-generated.
+    source:
+      name: Arup Hong Kong incident, reported by CNN (May 2024) and South
+        China Morning Post, confirmed by Arup CIO Rob Greig
+      url: TODO(source)
+    rail: wire-transfer
+    severity: critical
+
+  - id: S4-01
+    surface: S4
+    vector: Mandate/intent forgery and replay
+    description: >
+      Under an AP2-style agentic-payment flow, Intent/Cart/Payment mandates
+      are signed Verifiable Credentials. An attacker forges a mandate or
+      replays a previously-valid one to authorize a payment the user never
+      approved for that context.
+    source:
+      name: Google Agent Payments Protocol (AP2) specification, announced
+        16 Sep 2025
+      url: TODO(source)
+    rail: agentic-mandate
+    severity: high
+
+  - id: S5-01
+    surface: S5
+    vector: Black-box query evasion of the fraud scorer
+    description: >
+      Attacker iteratively perturbs transaction features, using the
+      detector's own score as feedback, to find a minimal mutation that
+      crosses the decision threshold without querying model internals.
+    source:
+      name: "Adversarial Learning in Real-World Fraud Detection"
+      url: https://arxiv.org/abs/2307.01390
+    rail: model-query-interface
+    severity: high

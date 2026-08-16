@@ -1,0 +1,66 @@
+seed: 42
+
+paths:
+  data_dir: data
+  results_dir: results
+  model_dir: data/models
+
+generator:
+  n_rows: 20000
+  fraud_prevalence: 0.005
+  start_date: "2026-01-01"
+  end_date: "2026-06-30"
+  n_payers: 5000
+  n_payees: 3000
+  devices_per_payer: 2
+  currencies:
+    INR: 0.7
+    USD: 0.2
+    EUR: 0.1
+  mcc_codes: [5411, 5812, 5732, 6011, 5999, 4111, 5941, 7995]
+  channels:
+    card_present: 0.25
+    ecom: 0.35
+    upi_p2p: 0.20
+    upi_p2m: 0.15
+    mandate: 0.05
+  countries: [IN, US, GB, AE, SG, CN, NG, RU]
+  domestic_country: IN
+  fraud_amount_multiplier: 3.0
+  fraud_new_payee_rate: 0.6
+  legit_new_payee_rate: 0.05
+  fraud_country_mismatch_rate: 0.4
+  legit_country_mismatch_rate: 0.02
+  fraud_velocity_multiplier: 4.0
+
+detector:
+  lightgbm:
+    n_estimators: 200
+    learning_rate: 0.05
+    max_depth: -1
+    num_leaves: 31
+    min_child_samples: 20
+    class_weight: balanced
+  calibration_method: isotonic
+  calibration_cv: 3
+  test_size: 0.2
+
+attacker:
+  population_size: 60
+  n_generations: 15
+  mutation_rate: 0.3
+  crossover_rate: 0.5
+  elitism_count: 4
+  tournament_size: 3
+  deployed_threshold: 0.5
+
+loop:
+  n_generations: 5
+  evasion_score_threshold: 0.5
+  n_evasions_to_mine_per_generation: 30
+  clean_holdout_fraction: 0.2
+
+metrics:
+  fpr_targets: [0.001, 0.01]
+  precision_at_k: [50, 100]
+  latency_n_iterations: 200
