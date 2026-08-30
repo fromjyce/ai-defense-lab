@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ai-defense-lab — closed-loop dashboard</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header>
+    <h1>ai-defense-lab</h1>
+    <p class="subtitle">Closed-loop red-team / blue-team payment fraud defense — live dashboard</p>
+    <p class="sandbox-banner">
+      Sandbox only. Every score and verification on this page runs against our own in-process
+      detector and our own localhost mock payment API. Nothing here connects to a live payment
+      system, real cardholder data, or any third party.
+    </p>
+  </header>
+
+  <main>
+    <section id="evasion-section" class="panel">
+      <h2>Evasion curve — attacker vs. detector across retraining generations</h2>
+      <p class="hint">
+        Each loop generation: the attacker evolves against the current detector, evasions are
+        mined and folded back into training, the detector retrains, then is re-scored on a
+        fixed, never-mined clean holdout. Watch both lines — a detector that "wins" by
+        degrading into a blanket blocker would show clean PR-AUC collapsing too.
+      </p>
+      <canvas id="evasion-chart" width="900" height="320"></canvas>
+      <div id="evasion-legend" class="legend"></div>
+    </section>
+
+    <section id="attack-section" class="panel">
+      <h2>Within-attack evolution</h2>
+      <p class="hint">
+        Inside a single loop generation, the evolutionary attacker mutates a population of
+        known-fraud transactions across generations against a <em>fixed</em> detector. This is
+        the fitness-improves-with-generations curve.
+      </p>
+      <label for="loop-gen-select">Loop generation:</label>
+      <select id="loop-gen-select"></select>
+      <canvas id="attack-chart" width="900" height="320"></canvas>
+    </section>
+
+    <section id="metrics-section" class="panel">
+      <h2>Detector metrics (held-out set)</h2>
+      <div id="metrics-cards" class="cards"></div>
+    </section>
+
+    <section id="fidelity-section" class="panel">
+      <h2>Synthetic-data fidelity</h2>
+      <div id="fidelity-cards" class="cards"></div>
+      <p id="fidelity-note" class="hint"></p>
+    </section>
+
+    <section id="score-section" class="panel">
+      <h2>Live transaction scorer</h2>
+      <p class="hint">Pulls a real generated row and scores it through the trained detector, in-process, via the sandboxed mock API.</p>
+      <div class="controls">
+        <button id="load-legit-btn">Load a legit-labeled sample</button>
+        <button id="load-fraud-btn">Load a fraud-labeled sample</button>
+        <button id="score-btn" disabled>Score it</button>
+      </div>
+      <pre id="txn-preview" class="code-block">No transaction loaded yet.</pre>
+      <div id="score-result" class="result-box"></div>
+    </section>
+
+    <section id="mandate-section" class="panel">
+      <h2>AP2-style mandate: forge / replay / scope-creep demo</h2>
+      <p class="hint">
+        Signs one mandate, then tries four things against it: a valid in-scope payment, a
+        replay at a higher amount than the mandate authorizes, a merchant-category scope
+        violation, and a tampered (re-signed-without-the-issuer) mandate.
+      </p>
+      <button id="mandate-demo-btn">Run mandate demo</button>
+      <div id="mandate-result" class="result-box"></div>
+    </section>
+
+    <section id="taxonomy-section" class="panel">
+      <h2>Attack taxonomy — Identify pillar</h2>
+      <table id="taxonomy-table">
+        <thead>
+          <tr><th>Surface</th><th>Vector</th><th>Rail</th><th>Severity</th><th>Source</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer>
+    <p>ai-defense-lab — Mastercard Innovation Challenge @ GFF 2026. See ETHICS.md and README.md.</p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

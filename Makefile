@@ -11,7 +11,7 @@ TRANSACTIONS := $(DATA_DIR)/transactions.csv
 HOLDOUT := $(DATA_DIR)/holdout.csv
 MODEL := $(DATA_DIR)/models/detector.joblib
 
-.PHONY: setup data train loop eval fidelity demo test clean
+.PHONY: setup data train loop eval fidelity demo web test clean
 
 setup:
 	$(PYTHON311) -m venv $(VENV)
@@ -42,10 +42,13 @@ fidelity:
 	$(PY) -m defend.eval.fidelity --config $(CONFIG) --out $(RESULTS_DIR)/fidelity_report.json
 
 demo:
-	@echo "No web UI yet (web/ is a placeholder this pass)."
-	@echo "Run 'make loop' and inspect results/evasion_curve.json for the headline chart data."
-	@echo "The mock payment API is implemented (generate/mock_api/app.py) and runnable after 'make train':"
+	@echo "Run 'make web' after 'make loop eval fidelity' for the live dashboard (attacker curve,"
+	@echo "detector metrics, live transaction scorer, mandate forgery demo, attack taxonomy)."
+	@echo "The mock payment API alone is runnable after 'make train':"
 	@echo "  $(PY) -m uvicorn generate.mock_api.app:app --reload"
+
+web:
+	$(PY) -m uvicorn web.server:app --reload --port 8000
 
 test:
 	$(PY) -m pytest tests/ -v
