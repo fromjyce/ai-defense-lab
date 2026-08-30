@@ -2,7 +2,13 @@
 
 Each loop generation:
   1. The evolutionary attacker evolves a fresh population against the
-     current detector.
+     current detector, seeded from known-fraud rows in the training pool
+     (not random rows) — the attacker's job is to disguise a fraud
+     transaction via its controllable fields, not to mutate an
+     already-legit-looking row. Seeding from random rows (99.5% legit by
+     construction) made every candidate look legit before mutation even
+     started, collapsing the evasion curve to a flat ~1.0 ceiling with no
+     room to show evolution or detector adaptation.
   2. The most evasive candidates (score below the deployed threshold) are
      mined and appended to the training pool.
   3. A new detector is trained from scratch on the enlarged pool.
@@ -28,7 +34,7 @@ import pandas as pd
 from config.settings import Settings, load_config
 from defend.eval.metrics import evaluate
 from defend.transaction.model import FraudDetector
-from generate.attacker.evolutionary import EvolutionaryAttacker
+from generate.attacker.evolutionary import EvolutionaryAttacker, GenerationStats
 from generate.synth.schema import COLUMNS
 
 SEED_POOL_SIZE = 2000
@@ -47,6 +53,7 @@ class LoopGenerationRecord:
     clean_pr_auc: float
     clean_roc_auc: float
     clean_recall_at_fpr: dict[str, float]
+    attack_generation_log: list[GenerationStats]
 
 
 def _reconstruct_train_pool(full_df: pd.DataFrame, holdout_df: pd.DataFrame) -> pd.DataFrame:
@@ -66,8 +73,11 @@ def run_loop(
     records: list[LoopGenerationRecord] = []
 
     for loop_gen in range(settings.loop.n_generations):
-        seed_pool = train_pool.sample(
-            n=min(SEED_POOL_SIZE, len(train_pool)),
+        fraud_pool = train_pool[train_pool["label"] == 1]
+        base_pool = fraud_pool if len(fraud_pool) > 0 else train_pool
+        seed_pool = base_pool.sample(
+            n=min(SEED_POOL_SIZE, len(base_pool)),
+            replace=len(base_pool) < SEED_POOL_SIZE,
             random_state=int(rng.integers(0, 2**31 - 1)),
         )
         attacker = EvolutionaryAttacker(settings.attacker, settings.generator, seed=settings.seed + loop_gen)
@@ -98,6 +108,7 @@ def run_loop(
                 clean_pr_auc=clean_metrics.pr_auc,
                 clean_roc_auc=clean_metrics.roc_auc,
                 clean_recall_at_fpr=clean_metrics.recall_at_fpr,
+                attack_generation_log=result.generation_log,
             )
         )
 
@@ -115,8 +126,20 @@ def write_results(records: list[LoopGenerationRecord], results_dir: Path) -> Non
     for r in records:
         row = asdict(r)
         row["clean_recall_at_fpr"] = json.dumps(row["clean_recall_at_fpr"])
+        row["attack_generation_log"] = json.dumps(row["attack_generation_log"])
         rows.append(row)
     pd.DataFrame(rows).to_csv(results_dir / "loop_log.csv", index=False)
+
+    # Flattened (loop_generation, ea_generation) rows for plotting the
+    # within-attack evasion curve — this is the "collapsing detector"
+    # chart: evasion score rising with EA generations as the attacker
+    # evolves against a fixed detector, for each loop (retraining) round.
+    ea_rows = [
+        {"loop_generation": r.loop_generation, **asdict(g)}
+        for r in records
+        for g in r.attack_generation_log
+    ]
+    pd.DataFrame(ea_rows).to_csv(results_dir / "attack_generation_curve.csv", index=False)
 
 
 def _parse_args() -> argparse.Namespace:

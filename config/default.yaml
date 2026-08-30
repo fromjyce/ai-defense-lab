@@ -6,7 +6,7 @@ paths:
   model_dir: data/models
 
 generator:
-  n_rows: 20000
+  n_rows: 50000
   fraud_prevalence: 0.005
   start_date: "2026-01-01"
   end_date: "2026-06-30"
@@ -55,9 +55,9 @@ attacker:
   deployed_threshold: 0.5
 
 loop:
-  n_generations: 5
+  n_generations: 8
   evasion_score_threshold: 0.5
-  n_evasions_to_mine_per_generation: 30
+  n_evasions_to_mine_per_generation: 50
   clean_holdout_fraction: 0.2
 
 metrics:
