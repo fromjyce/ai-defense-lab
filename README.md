@@ -20,19 +20,19 @@ synthetic transactions -> LightGBM detector -> evolutionary attacker
     -> evasions mined -> detector retrains -> evasion curve -> results/
 ```
 
-Everything else in the full design (multimodal deepfake fusion, the
-graph/mule layer, the AP2 mandate demo, the web UI) is stubbed behind a
-clean interface (`NotImplementedError` or a constant-returning stub) so the
-loop is demoable today and each stream can be filled in independently later.
+A second pass added v1 implementations of the multimodal, graph, and mock-API
+layers — each real and testable, but each with an explicit scope limit
+(below) rather than the full design. `web/` remains an empty placeholder.
 
 | Component | This pass |
 |---|---|
 | `generate/synth` | Implemented — named, interpretable fields, configurable base rates |
-| `generate/attacker` | Implemented — evolutionary search over attacker-controllable fields |
-| `generate/mock_api` | Stub — FastAPI skeleton, routes raise `NotImplementedError` |
+| `generate/synth/multimodal.py` | Implemented — synthetic session-risk placeholder features (not real audio/video), see file docstring |
+| `generate/attacker` | Implemented — evolutionary search over attacker-controllable fields, seeded from known-fraud rows |
+| `generate/mock_api` | Implemented — `/transactions/score` (wraps `FraudDetector`), `/mandates/verify` (HMAC-signed AP2-style mandate signature/expiry/scope checks) |
 | `defend/transaction` | Implemented — sklearn Pipeline, LightGBM, isotonic calibration |
-| `defend/multimodal` | Stub interface — constant-score stub |
-| `defend/graph` | Stub interface — empty-feature stub |
+| `defend/multimodal` | Implemented (v1) — `SyntheticFeatureScorer` + `LateFusionScorer` fit/score on synthetic placeholder features; a real ASVspoof/FaceForensics++-backed scorer drops in later behind the same `MultimodalScorer` interface |
+| `defend/graph` | Implemented (v1) — `StructuralGraphFeaturizer`: pandas-computed fan-in/fan-out and shared-device degree counts, no GNN dependency; not yet wired into the detector's training pipeline |
 | `defend/eval` | Implemented — PR-AUC, ROC-AUC, F1, recall@FPR, precision@k, Brier, latency |
 | `loop/orchestrator.py` | Implemented — runs the full attack/retrain cycle |
 | `web/` | Empty placeholder |
@@ -40,9 +40,11 @@ loop is demoable today and each stream can be filled in independently later.
 ## Sandbox statement
 
 All adversarial testing in this repository runs against our own in-process
-detector and, once implemented, our own sandboxed mock payment API only.
-Nothing here connects to, tests against, or is intended for use against any
-live payment system, real cardholder data, or third-party infrastructure.
+detector and our own sandboxed mock payment API (`generate/mock_api`, localhost
+only) — see that module's docstring. Nothing here connects to, tests against,
+or is intended for use against any live payment system, real cardholder data,
+or third-party infrastructure. The closed loop (`loop/orchestrator.py`) still
+scores in-process, not over HTTP; the mock API is a separate demo surface.
 
 ## Data provenance
 
