@@ -97,7 +97,7 @@ def _sample_rows(
     ip_country = _country_with_mismatch()
     merchant_country = _country_with_mismatch()
 
-    base_amount = rng.lognormal(mean=np.log(1200.0), sigma=1.1, size=n)
+    base_amount = rng.lognormal(mean=np.log(cfg.amount_lognormal_median), sigma=cfg.amount_lognormal_sigma, size=n)
     multiplier = cfg.fraud_amount_multiplier if is_fraud else 1.0
     amount = np.round(base_amount * multiplier, 2)
 

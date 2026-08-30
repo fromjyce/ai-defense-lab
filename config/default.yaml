@@ -26,6 +26,8 @@ generator:
     mandate: 0.05
   countries: [IN, US, GB, AE, SG, CN, NG, RU]
   domestic_country: IN
+  amount_lognormal_median: 1200.0
+  amount_lognormal_sigma: 1.1
   fraud_amount_multiplier: 3.0
   fraud_new_payee_rate: 0.6
   legit_new_payee_rate: 0.05

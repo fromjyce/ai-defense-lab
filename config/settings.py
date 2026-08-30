@@ -40,6 +40,8 @@ class GeneratorConfig(BaseModel):
     }
     countries: list[str] = ["IN", "US", "GB", "AE", "SG", "CN", "NG", "RU"]
     domestic_country: str = "IN"
+    amount_lognormal_median: float = 1200.0
+    amount_lognormal_sigma: float = 1.1
     fraud_amount_multiplier: float = 3.0
     fraud_new_payee_rate: float = 0.6
     legit_new_payee_rate: float = 0.05
