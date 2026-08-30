@@ -55,6 +55,30 @@ FIDELITY_NUMERIC_COLUMNS: tuple[str, ...] = (
     "velocity_24h",
 )
 
+# Monetary columns are heavily right-skewed. log1p keeps Euclidean-distance
+# metrics (dcr_privacy_check) from being dominated by a few huge-amount
+# outliers on raw scale, and keeps correlation_similarity well-behaved once
+# a second numeric column is added to a real comparison later.
+#
+# IMPORTANT CAVEAT (found empirically while investigating a low PaySim
+# marginal-similarity score, see README/session notes): marginal_similarity
+# is a two-sample Kolmogorov-Smirnov statistic, which is mathematically
+# invariant to *any* strictly monotonic transform applied identically to
+# both samples -- log1p included. It will not move that number, up or
+# down, ever. A low KS-based marginal similarity reflects a genuine
+# difference in distribution *shape* (percentile spacing), not a
+# scale/currency-unit artifact a transform could paper over. When we
+# compared our generator's amount output to real PaySim data, that is
+# exactly what we found: the low score is real shape divergence, most
+# likely because PaySim's amount is a mixture across five transaction
+# types (PAYMENT/TRANSFER/CASH_OUT/CASH_IN/DEBIT) with very different
+# typical values, while our generator draws from a single lognormal per
+# fraud/legit class. Closing that gap would mean restructuring the
+# generator's amount model (e.g. per-channel lognormal params), not
+# rescaling it -- a larger change, deliberately not made without a design
+# decision on whether that mixture is worth modeling.
+FIDELITY_LOG_COLUMNS: tuple[str, ...] = ("amount",)
+
 
 @dataclass
 class FidelityReport:
@@ -149,8 +173,22 @@ def dcr_privacy_check(
     return float(np.median(ratios))
 
 
-def _build_report(candidate: pd.DataFrame, reference: pd.DataFrame, columns: list[str], notes: list[str]) -> FidelityReport:
+def _build_report(
+    candidate: pd.DataFrame,
+    reference: pd.DataFrame,
+    columns: list[str],
+    notes: list[str],
+    log_columns: tuple[str, ...] = (),
+) -> FidelityReport:
     cand, ref = enforce_common_dtypes(candidate, reference, columns)
+    for col in log_columns:
+        if col in columns:
+            cand[col] = np.log1p(cand[col])
+            ref[col] = np.log1p(ref[col])
+    if log_columns:
+        applied = [c for c in log_columns if c in columns]
+        if applied:
+            notes = [*notes, f"log1p-transformed before comparison: {applied} (see FIDELITY_LOG_COLUMNS docstring)."]
     marginals = marginal_similarity(cand, ref, columns)
     return FidelityReport(
         columns=list(columns),
@@ -180,6 +218,7 @@ def compare_synthetic_runs(cfg: GeneratorConfig, seed_a: int, seed_b: int) -> Fi
             "different seeds), not a fidelity-to-real-world measurement. "
             "See evaluate_against_real() / TODO(data) for the real comparison."
         ],
+        log_columns=FIDELITY_LOG_COLUMNS,
     )
 
 
@@ -198,7 +237,7 @@ def evaluate_against_real(synthetic_df: pd.DataFrame, real_df: pd.DataFrame, col
             "trivially 1.0 (undefined with <2 columns) and should not be "
             "read as a meaningful similarity signal here."
         )
-    return _build_report(synthetic_df, renamed_real, columns, notes=notes)
+    return _build_report(synthetic_df, renamed_real, columns, notes=notes, log_columns=FIDELITY_LOG_COLUMNS)
 
 
 def write_json(report: FidelityReport, path: Path) -> None:
