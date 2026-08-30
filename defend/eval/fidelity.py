@@ -191,12 +191,14 @@ def evaluate_against_real(synthetic_df: pd.DataFrame, real_df: pd.DataFrame, col
     """
     renamed_real = real_df.rename(columns={v: k for k, v in column_map.items()})
     columns = list(column_map.keys())
-    return _build_report(
-        synthetic_df,
-        renamed_real,
-        columns,
-        notes=[f"Compared against real data via column_map={column_map}."],
-    )
+    notes = [f"Compared against real data via column_map={column_map}."]
+    if len(columns) < 2:
+        notes.append(
+            "Only one shared column available -- correlation_similarity is "
+            "trivially 1.0 (undefined with <2 columns) and should not be "
+            "read as a meaningful similarity signal here."
+        )
+    return _build_report(synthetic_df, renamed_real, columns, notes=notes)
 
 
 def write_json(report: FidelityReport, path: Path) -> None:
