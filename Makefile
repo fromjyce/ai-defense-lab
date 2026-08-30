@@ -11,7 +11,7 @@ TRANSACTIONS := $(DATA_DIR)/transactions.csv
 HOLDOUT := $(DATA_DIR)/holdout.csv
 MODEL := $(DATA_DIR)/models/detector.joblib
 
-.PHONY: setup data train loop eval demo test clean
+.PHONY: setup data train loop eval fidelity demo test clean
 
 setup:
 	$(PYTHON311) -m venv $(VENV)
@@ -36,6 +36,10 @@ eval: train
 	mkdir -p $(RESULTS_DIR)
 	$(PY) -m defend.eval.metrics --holdout $(HOLDOUT) --model $(MODEL) \
 		--config $(CONFIG) --out $(RESULTS_DIR)/metrics.json
+
+fidelity:
+	mkdir -p $(RESULTS_DIR)
+	$(PY) -m defend.eval.fidelity --config $(CONFIG) --out $(RESULTS_DIR)/fidelity_report.json
 
 demo:
 	@echo "No web UI yet (web/ is a placeholder this pass)."
