@@ -48,6 +48,25 @@ class GeneratorConfig(BaseModel):
     fraud_velocity_multiplier: float = 4.0
 
 
+class MultimodalConfig(BaseModel):
+    """Beta-distribution params for the synthetic session-risk placeholder
+    features (see generate/synth/multimodal.py) — NOT real audio/video
+    features. alpha/beta pairs control the mean/skew of each score in
+    [0, 1]; fraud rows are drawn from the "fraud" pair, legit rows from the
+    "legit" pair, mirroring the fraud/legit split already used by
+    GeneratorConfig.
+    """
+
+    fraud_liveness_alpha: float = 2.0
+    fraud_liveness_beta: float = 5.0
+    legit_liveness_alpha: float = 6.0
+    legit_liveness_beta: float = 1.5
+    fraud_similarity_alpha: float = 2.0
+    fraud_similarity_beta: float = 4.0
+    legit_similarity_alpha: float = 7.0
+    legit_similarity_beta: float = 1.5
+
+
 class LightGBMConfig(BaseModel):
     n_estimators: int = 200
     learning_rate: float = 0.05
@@ -93,6 +112,7 @@ class Settings(BaseSettings):
     seed: int = 42
     paths: PathsConfig = PathsConfig()
     generator: GeneratorConfig = GeneratorConfig()
+    multimodal: MultimodalConfig = MultimodalConfig()
     detector: DetectorConfig = DetectorConfig()
     attacker: AttackerConfig = AttackerConfig()
     loop: LoopConfig = LoopConfig()

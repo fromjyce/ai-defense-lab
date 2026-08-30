@@ -33,6 +33,16 @@ generator:
   legit_country_mismatch_rate: 0.02
   fraud_velocity_multiplier: 4.0
 
+multimodal:
+  fraud_liveness_alpha: 2.0
+  fraud_liveness_beta: 5.0
+  legit_liveness_alpha: 6.0
+  legit_liveness_beta: 1.5
+  fraud_similarity_alpha: 2.0
+  fraud_similarity_beta: 4.0
+  legit_similarity_alpha: 7.0
+  legit_similarity_beta: 1.5
+
 detector:
   lightgbm:
     n_estimators: 200

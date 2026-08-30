@@ -2,10 +2,12 @@
 face-forgery, document-forgery scoring), fused with the transaction stream
 by a late-fusion meta-classifier per the team brief.
 
-Not implemented this pass. `ConstantStubScorer` lets loop/orchestrator.py
-and defend/eval wire against a stable interface today; a real scorer
-(ASVspoof-based audio, FF++-based face) drops in later by implementing
-`MultimodalScorer` without touching any caller.
+`ConstantStubScorer` below is a placeholder. defend/multimodal/scorer.py's
+`SyntheticFeatureScorer` is a real (fit/score) implementation of this
+interface, trained on synthetic placeholder features (see
+generate/synth/multimodal.py) rather than real audio/video evidence — a
+real ASVspoof/FaceForensics++-backed scorer drops in later by implementing
+`MultimodalScorer` against real evidence, without touching any caller.
 """
 
 from __future__ import annotations
