@@ -3,14 +3,14 @@
 ## Scope
 
 This project builds a stress-testing capability for payment-fraud defenses,
-not an attack tool. The evolutionary attacker in `generate/attacker/` and,
-once implemented, the mock payment API in `generate/mock_api/` are the entire
-attack surface this repo touches — both are our own, sandboxed, in-process
+not an attack tool. The evolutionary attacker in `generate/attacker/` and
+the mock payment API in `generate/mock_api/` are the entire attack surface
+this repo touches — both are our own, sandboxed, in-process/localhost-only
 components.
 
 - **No live systems.** Adversarial testing targets only our own in-process
-  detector (`defend/transaction/`) and, once implemented, our own sandboxed
-  mock payment API (`generate/mock_api/`). No code in this repo makes network
+  detector (`defend/transaction/`) and our own sandboxed mock payment API
+  (`generate/mock_api/`, localhost only). No code in this repo makes network
   calls to any external host at runtime, and none ever will.
 - **No real data.** Synthetic, anonymised, or openly/research-licensed data
   only. No real cardholder data, no PII, no production payment data, under

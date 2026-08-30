@@ -20,9 +20,9 @@ synthetic transactions -> LightGBM detector -> evolutionary attacker
     -> evasions mined -> detector retrains -> evasion curve -> results/
 ```
 
-A second pass added v1 implementations of the multimodal, graph, and mock-API
-layers — each real and testable, but each with an explicit scope limit
-(below) rather than the full design. `web/` remains an empty placeholder.
+A second pass added v1 implementations of the multimodal, graph, mock-API,
+fidelity, and web layers — each real and testable, but each with an
+explicit scope limit (below) rather than the full design.
 
 | Component | This pass |
 |---|---|
@@ -33,9 +33,10 @@ layers — each real and testable, but each with an explicit scope limit
 | `defend/transaction` | Implemented — sklearn Pipeline, LightGBM, isotonic calibration |
 | `defend/multimodal` | Implemented (v1) — `SyntheticFeatureScorer` + `LateFusionScorer` fit/score on synthetic placeholder features; a real ASVspoof/FaceForensics++-backed scorer drops in later behind the same `MultimodalScorer` interface |
 | `defend/graph` | Implemented (v1) — `StructuralGraphFeaturizer`: pandas-computed fan-in/fan-out and shared-device degree counts, no GNN dependency; not yet wired into the detector's training pipeline |
-| `defend/eval` | Implemented — PR-AUC, ROC-AUC, F1, recall@FPR, precision@k, Brier, latency |
+| `defend/eval/metrics.py` | Implemented — PR-AUC, ROC-AUC, F1, recall@FPR, precision@k, Brier, latency |
+| `defend/eval/fidelity.py` | Implemented (v1) — marginal/correlation similarity + DCR privacy check; runs today as an internal-consistency check (synthetic vs. synthetic). Fidelity-to-*real*-data numbers need PaySim downloaded under your own Kaggle account (`scripts/download_paysim.sh`) — not run in this repo, see file docstring |
 | `loop/orchestrator.py` | Implemented — runs the full attack/retrain cycle |
-| `web/` | Empty placeholder |
+| `web/` | Implemented — single-page dashboard (`make web`): evasion curve, within-attack curve, metrics, fidelity, live scorer, mandate demo, taxonomy table |
 
 ## Sandbox statement
 
@@ -63,14 +64,16 @@ Requires Python 3.11. If `python3.11` isn't your default `python3`, install
 it first (e.g. `brew install python@3.11` on macOS).
 
 ```
-make setup   # creates .venv with python3.11, installs pinned requirements
-make data    # generates a synthetic transaction dataset into data/
-make train   # trains and calibrates the LightGBM detector
-make loop    # runs the closed-loop attacker/detector co-evolution
-make eval    # writes evaluation metrics to results/
-make test    # runs the pytest smoke suite
-make demo    # placeholder — see web/
-make clean   # removes data/, results/ contents, and the venv
+make setup    # creates .venv with python3.11, installs pinned requirements
+make data     # generates a synthetic transaction dataset into data/
+make train    # trains and calibrates the LightGBM detector
+make loop     # runs the closed-loop attacker/detector co-evolution
+make eval     # writes evaluation metrics to results/
+make fidelity # writes a synthetic-data fidelity report to results/
+make web      # serves the dashboard at http://127.0.0.1:8000 (run loop/eval/fidelity first)
+make test     # runs the pytest smoke suite
+make demo     # prints pointers to make web / the mock API
+make clean    # removes data/, results/ contents, and the venv
 ```
 
 `make loop` run twice with the same `config/default.yaml` produces identical
