@@ -40,6 +40,8 @@ eval: train
 demo:
 	@echo "No web UI yet (web/ is a placeholder this pass)."
 	@echo "Run 'make loop' and inspect results/evasion_curve.json for the headline chart data."
+	@echo "The mock payment API is implemented (generate/mock_api/app.py) and runnable after 'make train':"
+	@echo "  $(PY) -m uvicorn generate.mock_api.app:app --reload"
 
 test:
 	$(PY) -m pytest tests/ -v
