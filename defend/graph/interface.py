@@ -2,9 +2,10 @@
 scatter-gather patterns over the payer-payee money-flow graph), per the
 team brief's C3 component.
 
-Not implemented this pass. `StubGraphFeaturizer` returns an empty feature
-frame so the transaction pipeline's feature set can be extended with graph
-features later without changing any caller's contract.
+`StubGraphFeaturizer` returns an empty feature frame. defend/graph/
+featurizer.py's `StructuralGraphFeaturizer` is a real (pandas-computed
+degree/fan-in-out) implementation — see that module's docstring for why it
+is not a full GNN and is not yet wired into the detector pipeline.
 """
 
 from __future__ import annotations
