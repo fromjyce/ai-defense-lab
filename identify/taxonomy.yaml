@@ -1,8 +1,11 @@
 # Attack taxonomy — the Identify pillar.
 #
-# This pass defines the schema only, with three example rows (one grounded
-# citation each) to prove the shape out. Filling in the full six-surface
-# matrix (S1-S6, per the team brief) is future work.
+# Full six-surface matrix (S1-S6), sourced from research/RESEARCH_ON_AI_DEFENSE.pdf
+# section (A) "Attack-vector landscape". Figures attributed to vendors
+# (iProov, Entrust, Mastercard/Recorded Future, RBIH) or news/regulatory
+# sources are stated as claims of the named source, not independent fact —
+# see that source's incentive before citing further. url is TODO(source)
+# except for arXiv papers, which are directly traceable.
 #
 # Row schema:
 #   id:          stable identifier, "<surface>-<index>", e.g. "S1-01"
@@ -39,6 +42,118 @@ rows:
     rail: wire-transfer
     severity: critical
 
+  - id: S1-02
+    surface: S1
+    vector: Deepfake KYC / liveness bypass via injection attacks
+    description: >
+      Synthetic video is fed into an onboarding flow through a virtual
+      camera, bypassing the camera hardware itself (distinct from a
+      presentation attack against a physical camera, which is covered by
+      PAD under ISO/IEC 30107-3). Per iProov's Threat Intelligence Report
+      2025 (covering 2024 data), native virtual camera attacks increased by
+      2665% and face swap attacks surged 300% versus 2023; iProov's 2026
+      report (covering 2025 data) states injection attacks targeting iOS
+      devices surged 1,151% in the second half of 2025, contributing to a
+      741% annual increase. All figures are iProov's own (vendor-reported).
+    source:
+      name: iProov Threat Intelligence Report 2025 and 2026 (vendor report)
+      url: TODO(source)
+    rail: kyc-onboarding
+    severity: high
+
+  - id: S1-03
+    surface: S1
+    vector: Synthetic identity creation with GenAI documents and selfies
+    description: >
+      GenAI-forged identity documents paired with synthetic selfies are
+      used to pass onboarding checks. Per Entrust's 2025 Identity Fraud
+      Report, digital document forgeries surpassed physical counterfeits
+      for the first time in 2024, accounting for 57% of all document fraud
+      detected; the same report states a deepfake attack occurred every
+      five minutes in 2024. Entrust's own figures (vendor-reported).
+    source:
+      name: Entrust 2025 Identity Fraud Report (vendor report)
+      url: TODO(source)
+    rail: identity-verification
+    severity: high
+
+  - id: S2-01
+    surface: S2
+    vector: UPI collect-request (pull) abuse
+    description: >
+      A fraudster sends a P2P "collect" request disguised as a routine
+      payment prompt; the victim approves it believing they are receiving,
+      not sending, money. NPCI permanently blocked P2P collect requests
+      from October 1, 2025 in response.
+    source:
+      name: NPCI policy action, October 2025
+      url: TODO(source)
+    rail: upi
+    severity: high
+
+  - id: S2-02
+    surface: S2
+    vector: Digital-arrest scams
+    description: >
+      Victims are coerced via impersonation of law enforcement or
+      regulators into transferring funds to "clear" a fabricated legal
+      case, typically over a live video/voice call. India cyber-fraud
+      losses reached ₹22,845 crore in 2024, a 206% year-on-year jump, per
+      Ministry of Home Affairs data presented in Parliament; digital-arrest
+      cases specifically fell 86% in 2025 after I4C intervention, per
+      ThePrint's reporting of MHA data.
+    source:
+      name: MHA data presented in Parliament; ThePrint reporting on I4C intervention
+      url: TODO(source)
+    rail: upi
+    severity: critical
+
+  - id: S2-03
+    surface: S2
+    vector: Mule account networks
+    description: >
+      Fraud proceeds are laundered through chains of recruited or
+      compromised bank/UPI accounts to obscure the money trail.
+      MuleHunter.AI has studied 19 mule-account behavior patterns; RBIH CEO
+      Sahil Kini has cited "roughly 90%" detection accuracy in public
+      remarks — an institutional claim, not an independently audited
+      benchmark.
+    source:
+      name: RBIH MuleHunter.AI public statements (Sahil Kini, RBIH CEO)
+      url: TODO(source)
+    rail: upi
+    severity: high
+
+  - id: S3-01
+    surface: S3
+    vector: BIN attacks, card enumeration, and automated card testing
+    description: >
+      Automated agents probe card number ranges (BINs) and test stolen or
+      guessed card numbers at low-value merchants to validate them before
+      larger fraudulent use. Per Mastercard (2026, citing Recorded
+      Future's annual payment fraud report), "there were 10,500 such hacks
+      active in 2025, leading to the compromise of over 23 million online
+      transactions" — a Mastercard/Recorded Future claim, stated as such.
+    source:
+      name: Mastercard (2026), citing Recorded Future annual payment fraud report
+      url: TODO(source)
+    rail: card-not-present
+    severity: high
+
+  - id: S3-02
+    surface: S3
+    vector: Adversary-in-the-middle phishing kits defeating OTP/2FA
+    description: >
+      Real-time relay phishing kits (EvilProxy-style) sit between a victim
+      and a legitimate login/payment page, capturing session tokens and
+      one-time passcodes as the victim enters them, defeating OTP- and
+      2FA-based authentication.
+    source:
+      name: Research report synthesis (research/RESEARCH_ON_AI_DEFENSE.pdf, section A3)
+      url: TODO(source)
+    rail: card-not-present
+    severity: medium
+
   - id: S4-01
     surface: S4
     vector: Mandate/intent forgery and replay
@@ -54,6 +169,42 @@ rows:
     rail: agentic-mandate
     severity: high
 
+  - id: S4-02
+    surface: S4
+    vector: Indirect prompt injection against shopping/payment agents
+    description: >
+      Malicious content embedded in a merchant page or product listing
+      hijacks an AI shopping/payment agent into making or redirecting a
+      payment the user never intended. Documented in the wild by Palo Alto
+      Unit 42, Zscaler ThreatLabz, and Forcepoint X-Labs (2025-26). A
+      public red-teaming competition logged 1.8M injection attempts with
+      60,000+ successful policy violations; Google reported a 32% rise in
+      malicious injection payloads between November 2025 and February
+      2026 — attributed figures, not independently reproduced here.
+    source:
+      name: Palo Alto Unit 42 / Zscaler ThreatLabz / Forcepoint X-Labs (2025-26); Google injection-payload telemetry
+      url: TODO(source)
+    rail: model-query-interface
+    severity: critical
+
+  - id: S4-03
+    surface: S4
+    vector: Agent over-authorization / scope creep
+    description: >
+      A shopping or payment agent acts within its technical permissions
+      but outside the user's actual intent (e.g. purchasing a different
+      item, quantity, or price than authorized). Mastercard's own framing
+      is that even a well-behaved agent buying outside intended scope is
+      "functionally indistinguishable from fraud" from the issuer's
+      perspective — this is a scope-enforcement problem, not a
+      classification problem, and is why AP2-style mandates carry explicit
+      scope/limit fields.
+    source:
+      name: Mastercard framing, cited in research/RESEARCH_ON_AI_DEFENSE.pdf section A4
+      url: TODO(source)
+    rail: agentic-mandate
+    severity: medium
+
   - id: S5-01
     surface: S5
     vector: Black-box query evasion of the fraud scorer
@@ -66,3 +217,57 @@ rows:
       url: https://arxiv.org/abs/2307.01390
     rail: model-query-interface
     severity: high
+
+  - id: S5-02
+    surface: S5
+    vector: Data poisoning of the retraining loop
+    description: >
+      An adversary who knows (or infers) that mined evasions get folded
+      back into training seeds a stream of near-boundary candidates
+      designed to shift the decision boundary in the attacker's favor
+      rather than close the gap it exploited. This is the specific failure
+      mode loop/orchestrator.py guards against by re-evaluating each
+      retrained detector on a fixed, never-mined clean holdout every
+      generation — if clean-set PR-AUC degrades alongside a rising attack
+      success rate, that is this attack succeeding. Prior art: RL-based
+      evasion GANs (RELEVAGAN) apply a related idea to generate
+      poison-quality adversarial examples.
+    source:
+      name: "RELEVAGAN: Relevant Data Generation via GANs for Fraud Detection"
+      url: https://arxiv.org/abs/2210.02840
+    rail: model-query-interface
+    severity: high
+
+  - id: S6-01
+    surface: S6
+    vector: Scam-as-a-service LLM tooling
+    description: >
+      Jailbroken or purpose-built LLM services (FraudGPT, WormGPT, and
+      since April 2025 successors such as Xanthorox) are sold as
+      subscriptions to lower the skill floor for phishing/scam content
+      generation; SlashNext has reported pricing in the ~$60-700/month
+      range. Security researchers (Netenrich, Tanium) assess much of this
+      market as overhyped repackaged jailbreaks rather than a novel
+      capability — present as a capability trend, not a proven
+      super-weapon, per the research report's explicit caveat.
+    source:
+      name: SlashNext pricing data; Netenrich/Tanium capability assessments
+      url: TODO(source)
+    rail: cross-rail
+    severity: medium
+
+  - id: S6-02
+    surface: S6
+    vector: Cheap multilingual scam localization and automated victim profiling
+    description: >
+      LLMs lower the cost of translating and localizing scam pretexts into
+      regional languages (a specific concern for India's linguistic
+      diversity) and of automating OSINT-based victim profiling ahead of a
+      social-engineering attempt. No payment-rail-specific figures are
+      available for this vector; it is a capability multiplier across
+      S1/S2 rather than a distinct rail.
+    source:
+      name: Research report synthesis (research/RESEARCH_ON_AI_DEFENSE.pdf, section A6)
+      url: TODO(source)
+    rail: cross-rail
+    severity: medium
