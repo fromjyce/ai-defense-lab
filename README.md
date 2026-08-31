@@ -22,7 +22,13 @@ number nobody asked for and report it anyway:
 - `results/evasion_curve.json` — eight retraining rounds where clean-set
   PR-AUC is tracked alongside attack success, specifically so a detector
   that "wins" by turning into a blanket blocker would show up as a PR-AUC
-  collapse, not a victory.
+  collapse, not a victory. In this run it's not a clean win either way:
+  clean PR-AUC holds in a 0.87–0.91 band for the first seven rounds, then
+  drops to 0.70 at round 7, a dip we haven't root-caused and left flagged
+  rather than smoothed over. Attack success stays at or near 100% almost
+  every round regardless — mining evasions back into training isn't
+  neutralizing the attacker, and we're reporting that instead of picking
+  a rosier round to cite.
 - `results/fidelity_report_vs_paysim.json` — a synthetic-vs-real fidelity
   check against 6.36M PaySim transactions that came back at 20% marginal
   similarity. We didn't retune the generator until that number looked
