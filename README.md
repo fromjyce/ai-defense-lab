@@ -49,6 +49,20 @@ None of that is unusual to build. What's harder to fake is running it,
 finding the answer you didn't want, and printing it anyway — that's the
 throughline across this repo, not any one component.
 
+## Demo
+
+Screenshots from the live dashboard (`make web`), each panel backed by real
+results in `results/`, not mock data.
+
+| | |
+|---|---|
+| ![Evasion curve and within-attack evolution](documents/images/JNR_DEMO_1.png) | ![Detector metrics and fidelity](documents/images/JNR_DEMO_2.png) |
+| Evasion curve across 8 retraining rounds (clean-set PR-AUC vs. attack success) plus the within-episode evolutionary curve for a single generation. | Held-out detector metrics (PR-AUC, ROC-AUC, recall@FPR, latency) and the synthetic-data fidelity check, reported as-is. |
+| ![Live transaction scorer: legit example](documents/images/JNR_DEMO_3.png) | ![Live transaction scorer: fraud example](documents/images/JNR_DEMO_4.png) |
+| Live scorer on a legit-labeled sample — not flagged, score 0.0002. | Live scorer on a fraud-labeled sample — flagged, score 1.0000. |
+| ![Mandate forgery/replay/scope-creep demo](documents/images/JNR_DEMO_5.png) | ![Sourced attack taxonomy](documents/images/JNR_DEMO_6.png) |
+| AP2-style mandate demo: a valid in-scope payment authorized; a replay above the mandate cap, a scope violation, and a tampered mandate all blocked. | The attack taxonomy table — every row sourced to a named incident, spec, or report. |
+
 ## Status: scaffold + vertical slice
 
 This repo is deliberately built in passes. The current pass wires one
