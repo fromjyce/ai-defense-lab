@@ -10,6 +10,39 @@ the training set; the detector retrains; the cycle repeats. We track both the
 attacker's success rate and the detector's clean-set PR-AUC per generation so
 the detector can't "win" by degrading into a blanket blocker.
 
+## What to check first, if you're skimming
+
+Most of what's below is standard scaffold documentation. The parts of this
+repo that are actually worth a judge's time are the parts that produce a
+number nobody asked for and report it anyway:
+
+- `results/attack_generation_curve.csv` — the within-episode evasion curve
+  (8.3% → 100% by generation 6), evidence the attacker is *searching*, not
+  guessing once and getting lucky.
+- `results/evasion_curve.json` — eight retraining rounds where clean-set
+  PR-AUC is tracked alongside attack success, specifically so a detector
+  that "wins" by turning into a blanket blocker would show up as a PR-AUC
+  collapse, not a victory.
+- `results/fidelity_report_vs_paysim.json` — a synthetic-vs-real fidelity
+  check against 6.36M PaySim transactions that came back at 20% marginal
+  similarity. We didn't retune the generator until that number looked
+  better; `defend/eval/fidelity.py`'s module docstring walks through why,
+  including a dead-end log-transform attempt that turned into a finding
+  about Kolmogorov–Smirnov invariance.
+- `identify/taxonomy.yaml` — every attack row cites a named incident,
+  protocol spec, or regulator filing, not a category an LLM would invent
+  unprompted (S1-02 and S6 in particular are marked with vendor-attributed
+  figures, flagged as such, because they came from a party with a
+  commercial incentive to inflate them).
+- 17 named, interpretable schema fields (`amount`, `channel`,
+  `velocity_1h`, ...) instead of PCA components, specifically so every
+  attacker mutation and every detector feature is something you can point
+  to and explain, not a number called `V17`.
+
+None of that is unusual to build. What's harder to fake is running it,
+finding the answer you didn't want, and printing it anyway — that's the
+throughline across this repo, not any one component.
+
 ## Status: scaffold + vertical slice
 
 This repo is deliberately built in passes. The current pass wires one
